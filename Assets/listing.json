@@ -1,6 +1,6 @@
 {
   "name": "Graph",
-  "tagline": "A 3D graph of how things connect for any app: hubs and leaves as spheres joined by thin cylinders, the selected node pulsing, a card with its text, from the app's own types.",
+  "tagline": "A 3D graph of how things connect for any app: hubs and leaves as spheres, the selected node pulsing, a card with its text.",
   "category": "developer",
   "keywords": [
     "swiftui",
