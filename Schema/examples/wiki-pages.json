@@ -1,0 +1,23 @@
+{
+  "into": "Shared/Views/PageMap",
+  "mappings": [
+    "node: Page id=slug level=depth text=summary",
+    "edge: PageLink from=source to=target"
+  ],
+  "strings": [
+    "title = Pages",
+    "hub = Depth {level}",
+    "leaf = Page",
+    "loading = Mapping pages…",
+    "empty = Write a page to start the map."
+  ],
+  "tuning": [
+    "ringRadius = 4",
+    "excerpt = 160",
+    "badgeDesign = rounded",
+    "panelMaterial = regular",
+    "emptySymbol = doc.text.magnifyingglass"
+  ],
+  "launch": ["pages.map = graph", "pages.page = text(home)"],
+  "prefix": "Wiki"
+}

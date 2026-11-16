@@ -1,0 +1,35 @@
+{
+  "mappings": ["node: GraphNode id=id level=level text=text neighbours=neighborIds"],
+  "imports": ["SeerKit"],
+  "look": [
+    "title = Font.brandTitle",
+    "note = Font.brandNote",
+    "note2 = Font.brandNote2",
+    "accent = Color.accent"
+  ],
+  "strings": [
+    "title = Atlas",
+    "hub = L{level} Hub",
+    "leaf = Leaf",
+    "loading = Connecting…",
+    "empty = Add your first document to see your knowledge graph.",
+    "retry = Retry"
+  ],
+  "tuning": [
+    "hubRadius = 0.45",
+    "hubRadiusStep = 0.18",
+    "leafRadius = 0.18",
+    "ringRadius = 3",
+    "leafDistance = 1.8",
+    "edgeRadius = 0.03",
+    "cameraDistance = 14",
+    "pulseScale = 1.12",
+    "pulseDuration = 1",
+    "excerpt = 240",
+    "badgeSize = 12",
+    "panelRadius = 20",
+    "panelMaterial = ultraThin",
+    "showAnimation = .spring(response: 0.4, dampingFraction: 0.8)"
+  ],
+  "launch": ["atlas = graph(space-001, space-002, space-003)"]
+}

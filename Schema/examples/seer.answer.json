@@ -1,0 +1,143 @@
+{
+  "agent" : {
+    "word" : "graph"
+  },
+  "conformances" : [
+    "GraphNode: node"
+  ],
+  "expected" : [
+    {
+      "kind" : "view",
+      "name" : "GraphView"
+    },
+    {
+      "kind" : "view",
+      "name" : "GraphScene"
+    },
+    {
+      "kind" : "view",
+      "name" : "GraphBadge"
+    },
+    {
+      "kind" : "view",
+      "name" : "GraphPanel"
+    },
+    {
+      "kind" : "view",
+      "name" : "GraphTextSheet"
+    },
+    {
+      "kind" : "view",
+      "name" : "GraphLoadingView"
+    },
+    {
+      "kind" : "view",
+      "name" : "GraphEmptyView"
+    },
+    {
+      "kind" : "view",
+      "name" : "GraphFailedView"
+    },
+    {
+      "kind" : "conformance",
+      "name" : "GraphNode"
+    }
+  ],
+  "format" : "granite-answer/1",
+  "made" : [
+    {
+      "kind" : "view",
+      "name" : "GraphView",
+      "path" : "Components/Graph/GraphView.swift",
+      "state" : "written"
+    },
+    {
+      "kind" : "view",
+      "name" : "GraphScene",
+      "path" : "Components/Graph/GraphScene.swift",
+      "state" : "written"
+    },
+    {
+      "kind" : "view",
+      "name" : "GraphBadge",
+      "path" : "Components/Graph/GraphBadge.swift",
+      "state" : "written"
+    },
+    {
+      "kind" : "view",
+      "name" : "GraphPanel",
+      "path" : "Components/Graph/GraphPanel.swift",
+      "state" : "written"
+    },
+    {
+      "kind" : "view",
+      "name" : "GraphTextSheet",
+      "path" : "Components/Graph/GraphTextSheet.swift",
+      "state" : "written"
+    },
+    {
+      "kind" : "view",
+      "name" : "GraphLoadingView",
+      "path" : "Components/Graph/GraphLoadingView.swift",
+      "state" : "written"
+    },
+    {
+      "kind" : "view",
+      "name" : "GraphEmptyView",
+      "path" : "Components/Graph/GraphEmptyView.swift",
+      "state" : "written"
+    },
+    {
+      "kind" : "view",
+      "name" : "GraphFailedView",
+      "path" : "Components/Graph/GraphFailedView.swift",
+      "state" : "written"
+    },
+    {
+      "kind" : "conformance",
+      "name" : "GraphNode",
+      "path" : "Components/Graph/Conformances/GraphNode+Node.swift",
+      "state" : "written"
+    }
+  ],
+  "notes" : [
+
+  ],
+  "path" : "Components/Graph/GraphProtocols.swift",
+  "paths" : [
+    "Components/Graph/GraphProtocols.swift",
+    "Components/Graph/GraphValue.swift",
+    "Components/Graph/GraphLook.swift",
+    "Components/Graph/GraphStrings.swift",
+    "Components/Graph/GraphLaunch.swift",
+    "Components/Graph/GraphSupport.swift",
+    "Components/Graph/GraphStage.swift",
+    "Components/Graph/GraphScene.swift",
+    "Components/Graph/GraphBar.swift",
+    "Components/Graph/GraphBadge.swift",
+    "Components/Graph/GraphPanel.swift",
+    "Components/Graph/GraphTextSheet.swift",
+    "Components/Graph/GraphLoadingView.swift",
+    "Components/Graph/GraphEmptyView.swift",
+    "Components/Graph/GraphFailedView.swift",
+    "Components/Graph/GraphView.swift",
+    "Components/Graph/GraphPreviews.swift",
+    "Components/Graph/Conformances/GraphNode+Node.swift"
+  ],
+  "problems" : [
+
+  ],
+  "roots" : [
+    "GraphView(ids: [String] = [], nodes: [GraphNode], load: (([String]) async throws -> Void)? = nil)"
+  ],
+  "views" : [
+    "GraphView",
+    "GraphScene",
+    "GraphBadge",
+    "GraphPanel",
+    "GraphTextSheet",
+    "GraphLoadingView",
+    "GraphEmptyView",
+    "GraphFailedView"
+  ]
+}
