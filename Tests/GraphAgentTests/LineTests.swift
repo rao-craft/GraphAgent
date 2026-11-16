@@ -114,6 +114,7 @@ final class LineTests: XCTestCase {
             ("loading = \"Connecting…\"", "loading", "Connecting…"),
             ("empty = Add your first document to see your knowledge graph.", "empty", "Add your first document to see your knowledge graph."),
             ("empty = \"Nothing here,\\nyet.\"", "empty", "Nothing here,\nyet."),
+            ("title =", "title", ""),
         ]
         for (line, key, text) in cases {
             guard case .success(let parsed) = StringsLine.parse(line, keys: GraphTables.strings) else { XCTFail(line); continue }
@@ -126,7 +127,8 @@ final class LineTests: XCTestCase {
         let refused: [(String, String)] = [
             ("title: Atlas", "a strings line is `key = words`"),
             ("colour = red", "`colour` is not a string key; the keys are title, hub"),
-            ("title = \"\"", "`title` is empty"),
+            ("title = \"\"", "`title` is empty: say it in words, write `title =` alone for none, or leave the line out"),
+            ("leaf =", "`leaf` is empty: say it in words or leave the line out for \"Leaf\""),
             ("hub = Hub", "`hub` says `{level}`"),
             ("leaf = Leaf {level}", "`leaf` says no `{…}`"),
         ]
@@ -146,6 +148,7 @@ final class LineTests: XCTestCase {
             ("showAnimation = .spring(response: 0.4, dampingFraction: 0.8)", ".spring(response: 0.4, dampingFraction: 0.8)"),
             ("showAnimation = spring(response:0.4,dampingFraction:0.8)", ".spring(response: 0.4, dampingFraction: 0.8)"),
             ("showAnimation = .smooth", ".smooth"),
+            ("layout = Force", "force"), ("hubLeaves = named", "named"), ("bodySeed = 19106", "19106"),
         ]
         for (line, value) in cases {
             guard case .success(let parsed) = TuningLine.parse(line, keys: GraphTables.tuning) else { XCTFail(line); continue }
@@ -163,6 +166,8 @@ final class LineTests: XCTestCase {
             ("badgeDesign = comic", "`badgeDesign` takes a font design"),
             ("panelMaterial = glass", "`panelMaterial` takes a material"),
             ("showAnimation = .wobble(3)", "`showAnimation` takes an animation"),
+            ("layout = grid", "`layout` takes a layout: circle or force"),
+            ("hubLeaves = all", "`hubLeaves` takes a leaf rule: joined or named"),
         ]
         for (line, reason) in refused {
             guard case .failure(let error) = TuningLine.parse(line, keys: GraphTables.tuning) else { XCTFail(line); continue }

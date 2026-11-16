@@ -1,3 +1,4 @@
+import CryptoKit
 import Foundation
 import XCTest
 @testable import GraphAgent
@@ -52,14 +53,18 @@ final class EmitTests: XCTestCase {
         XCTAssertNil(code.range(of: Fixture.mockIDs, options: .regularExpression), "B-data-8 is the mock graph's: the kit never writes its ids")
     }
 
-    /// Every word the spec quotes for the Atlas sheet is in the Seer call's output.
+    /// Every word the spec quotes for the Atlas sheet is in the Seer call's output, but its title: the original's bar
+    /// holds only its three buttons, so the Seer call says `title =` and the bar writes no title.
     func testEveryQuotedWordOfTheSpecIsWritten() throws {
         let result = try write(try Fixture.example("seer"), into: try Fixture.folder())
         let code = try Fixture.all(result.paths)
         for word in Fixture.quoted { XCTAssertNotNil(code.range(of: word), word) }
+        let bar = try Fixture.text(result.paths, "GraphBar.swift")
+        XCTAssertFalse(bar.contains("placement: .principal"), "no title in the bar")
+        XCTAssertTrue(bar.contains(".navigationTitle(title)"))
         let strings = try Fixture.text(result.paths, "GraphStrings.swift")
         for line in [
-            #"static var title: String { "Atlas" }"#,
+            #"static var title: String { "" }"#,
             #"static func hub(_ level: Int) -> String { "L\(level) Hub" }"#,
             #"static var leaf: String { "Leaf" }"#,
             #"static var loading: String { "Connecting…" }"#,
@@ -69,19 +74,25 @@ final class EmitTests: XCTestCase {
         }
     }
 
-    /// The numbers the spec gives, written where a person would write them.
+    /// The numbers the original uses, written where a person would write them: its radii, its thin links, its camera,
+    /// its force layout from a fixed seed, its lumps from another, its clay's octaves, and only the leaves a hub names.
     func testTheSeerCallsNumbersLookAndLaunch() throws {
         let result = try write(try Fixture.example("seer"), into: try Fixture.folder())
         let stage = try Fixture.text(result.paths, "GraphStage.swift")
-        for line in ["Float(0.45 + 0.18 * Double(dot.level))", "SCNSphere(radius: 0.18)", "SCNCylinder(radius: 0.03, height: CGFloat(length))",
-                     "camera.simdPosition = SIMD3<Float>(0, 0, 14)", "SIMD3<Float>(repeating: 1.12)", "pulse.duration = 1\n",
-                     "lens.fieldOfView = 50", "let distance: Float = dot.isHub ? 18 : 12", "material.shaderModifiers = [.surface: Self.clay]"] {
+        for line in ["Float(0.45 + 0.18 * Double(dot.level))", "let radius = Float(0.18) + seed.within(-0.04, 0.04)",
+                     "SCNCylinder(radius: 0.022, height: CGFloat(length))", "camera.simdPosition = SIMD3<Float>(0, 0, 12)",
+                     "SIMD3<Float>(repeating: 1.12)", "pulse.duration = 1\n", "lens.fieldOfView = 50", "let distance: Float = dot.isHub ? 18 : 12",
+                     "let distance = max(12, (furthest + 1.5) / tan(half))", "material.shaderModifiers = [.surface: Self.clay]",
+                     #"var seed = Seed(dot.id + "/19106")"#, "places = GraphLayout.positions(shape, keeping: places)",
+                     "weight *= 0.63;", "return sum / 1.0134;"] {
             XCTAssertTrue(stage.contains(line), line)
         }
         let support = try Fixture.text(result.paths, "GraphSupport.swift")
-        XCTAssertTrue(support.contains("let ring: Float = 3"))
-        XCTAssertTrue(support.contains("spread(index, of: leaves.count) * 1.8"))
-        XCTAssertTrue(support.contains("passage(String(text.prefix(240)))"))
+        for line in ["seed: UInt64 = 417352", "for step in 0..<400 {", "hubs.first { named[$0.id]?.contains(id) == true }?.id",
+                     "passage(String(text.prefix(240)))"] {
+            XCTAssertTrue(support.contains(line), line)
+        }
+        XCTAssertFalse(support.contains("let ring: Float"), "no circle")
         let scene = try Fixture.text(result.paths, "GraphScene.swift")
         XCTAssertTrue(scene.contains("view.allowsCameraControl = true"))
         XCTAssertTrue(scene.contains("view.backgroundColor = .clear"))
@@ -99,7 +110,27 @@ final class EmitTests: XCTestCase {
         }
         let launch = try Fixture.text(result.paths, "GraphLaunch.swift")
         XCTAssertTrue(launch.contains(#"switch UserDefaults.standard.string(forKey: "destination") {"#))
-        XCTAssertTrue(launch.contains(#"case "atlas": return .graph(["space-001", "space-002", "space-003"])"#))
+        XCTAssertTrue(launch.contains(#"case "atlas": return .graph(["space-001"])"#))
+    }
+
+    /// A call that says nothing added since the first version (no `layout`, `layoutSeed`, `hubLeaves`, `bodySeed`,
+    /// `leafRadiusSpread` or `clayDetail`, a title in words) writes the very bytes it wrote then: the Seer call as the
+    /// spec gives it, the wiki's and the least, each pinned by the SHA-256 of its files, their paths and their text.
+    func testACallThatSaysNothingNewWritesWhatItAlwaysWrote() throws {
+        let calls: [(name: String, call: GraphAgent.Input, digest: String)] = [
+            ("the spec's Seer call", Fixture.specSeer, "07fbab1f579e053449c0833da7b985637673ae8a90f79e28508ace1d57a028c6"),
+            ("the wiki's", try Fixture.example("wiki-pages"), "30a0e63d0284d8f7489922d29aae90d9d00c9fbc7ca4e066155f7c9e361a6408"),
+            ("the least", GraphAgent.Input(), "411cab5b2112c3246bce4d4be4e1c5e94eb17f5f1f083588f6860ccf712e9c39"),
+        ]
+        for (name, call, digest) in calls {
+            let folder = try Fixture.folder()
+            let result = try write(call, into: folder)
+            let text = try result.paths.sorted().map { path in
+                path.replacingOccurrences(of: folder.path + "/", with: "") + "\n" + (try String(contentsOfFile: path, encoding: .utf8))
+            }.joined(separator: "\n")
+            let written = SHA256.hash(data: Data(text.utf8)).map { String(format: "%02x", $0) }.joined()
+            XCTAssertEqual(written, digest, name)
+        }
     }
 
     func testTheSameCallWritesTheSameBytes() throws {

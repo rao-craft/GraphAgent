@@ -8,7 +8,7 @@
     "accent = Color.accent"
   ],
   "strings": [
-    "title = Atlas",
+    "title =",
     "hub = L{level} Hub",
     "leaf = Leaf",
     "loading = Connecting…",
@@ -19,10 +19,14 @@
     "hubRadius = 0.45",
     "hubRadiusStep = 0.18",
     "leafRadius = 0.18",
-    "ringRadius = 3",
-    "leafDistance = 1.8",
-    "edgeRadius = 0.03",
-    "cameraDistance = 14",
+    "leafRadiusSpread = 0.04",
+    "bodySeed = 19106",
+    "layout = force",
+    "layoutSeed = 417352",
+    "hubLeaves = named",
+    "edgeRadius = 0.022",
+    "clayDetail = 0.63",
+    "cameraDistance = 12",
     "pulseScale = 1.12",
     "pulseDuration = 1",
     "excerpt = 240",
@@ -31,5 +35,5 @@
     "panelMaterial = ultraThin",
     "showAnimation = .spring(response: 0.4, dampingFraction: 0.8)"
   ],
-  "launch": ["atlas = graph(space-001, space-002, space-003)"]
+  "launch": ["atlas = graph(space-001)"]
 }

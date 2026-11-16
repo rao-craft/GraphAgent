@@ -19,6 +19,21 @@ enum Fixture {
         return try JSONDecoder().decode(GraphAgent.Input.self, from: data)
     }
 
+    /// The Seer call as the spec gives it, and as the first version shipped it: the title in the bar, the hubs on a
+    /// circle, the spec's numbers. What it writes is pinned, so a later key changes nothing for a call that does not
+    /// name it.
+    static let specSeer = GraphAgent.Input(
+        mappings: ["node: GraphNode id=id level=level text=text neighbours=neighborIds"],
+        imports: ["SeerKit"],
+        look: ["title = Font.brandTitle", "note = Font.brandNote", "note2 = Font.brandNote2", "accent = Color.accent"],
+        strings: ["title = Atlas", "hub = L{level} Hub", "leaf = Leaf", "loading = Connecting…",
+                  "empty = Add your first document to see your knowledge graph.", "retry = Retry"],
+        tuning: ["hubRadius = 0.45", "hubRadiusStep = 0.18", "leafRadius = 0.18", "ringRadius = 3", "leafDistance = 1.8",
+                 "edgeRadius = 0.03", "cameraDistance = 14", "pulseScale = 1.12", "pulseDuration = 1", "excerpt = 240",
+                 "badgeSize = 12", "panelRadius = 20", "panelMaterial = ultraThin",
+                 "showAnimation = .spring(response: 0.4, dampingFraction: 0.8)"],
+        launch: ["atlas = graph(space-001, space-002, space-003)"])
+
     /// The text of the file `name` among `paths`.
     static func text(_ paths: [String], _ name: String) throws -> String {
         guard let path = paths.first(where: { $0.hasSuffix("/" + name) }) else {
@@ -46,9 +61,10 @@ enum Fixture {
     /// B-data-8, the mock graph's node ids (`<document>#0`): `$mocks`' and the app's to write, never the kit's.
     static let mockIDs = ##"#0"|#\\\("##
 
-    /// Every word the spec quotes for the Atlas sheet, as the code says it: the badge that carries a level is checked
-    /// by its words around the level (`"L2 Hub"` is `"L\(` and ` Hub"`).
-    static let quoted = ["\"Atlas\"", "\"L\\(", " Hub\"", "\"Leaf\"", "\"Connecting…\""]
+    /// Every word the spec quotes for the Atlas sheet, as the code says it, but its title "Atlas": the original's bar
+    /// shows none, and the reference wins. The badge that carries a level is checked by its words around the level
+    /// (`"L2 Hub"` is `"L\(` and ` Hub"`).
+    static let quoted = ["\"L\\(", " Hub\"", "\"Leaf\"", "\"Connecting…\""]
 
     /// SeerKit as the Seer call reads it: the graph's node, in a package of its own.
     static let seerKit = """

@@ -64,16 +64,17 @@ public struct GraphAgent: GraniteAgentPackage {
         "mappings": "one line a role (node, edge): `node: GraphNode id=id level=level text=text neighbours=neighborIds`, `edge: Link from=source to=target`; a bare path is read off the value, anything else is Swift that may name `value`",
         "imports": "modules the conformances import, such as the package a mapped type is declared in",
         "look": "look roles mapped to the app's names, one a line: `title = Font.brandTitle`; roles title, note, note2, passage (Font), accent, foreground, hubBadge, leafBadge (Color); an unmapped role is the system's",
-        "strings": "the words, one a line, `key = words` (quotes optional): `title = Atlas`, `hub = L{level} Hub`, `loading = Connecting…`; every key and its default in Graph.md",
-        "tuning": "numbers, symbols and motion, one a line: `hubRadius = 0.45`, `excerpt = 240`, `pulseScale = 1.12`, `showAnimation = .spring(response: 0.4, dampingFraction: 0.8)`; every key in Graph.md",
+        "strings": "the words, one a line, `key = words` (quotes optional): `title = Atlas`, `hub = L{level} Hub`, `loading = Connecting…`; `title =` with nothing after it draws no title; every key and its default in Graph.md",
+        "tuning": "numbers, symbols and motion, one a line: `hubRadius = 0.45`, `excerpt = 240`, `pulseScale = 1.12`, `showAnimation = .spring(response: 0.4, dampingFraction: 0.8)`; `layout = force` stands the nodes where their links pull them instead of round a circle (`layoutSeed = 7` picks its starts); `hubLeaves = named` puts out only the leaves an open hub names itself; every key in Graph.md",
         "launch": "the state the root opens in for a launch with `-destination <name>`, one a line: `atlas = graph(space-001, space-002)`; states graph and text, each with the ids it loads in parentheses (none: the page's own)",
         "prefix": "what the kit's names start with instead of Graph, when the app already has those names: `Wiki` writes WikiView",
     ]
     public static let guide = """
         Tag graph for a screen that shows how an app's items connect, in 3D: hubs (level above 0) as large spheres \
-        evenly round a circle facing the camera, each leaf (level 0) a small sphere out only around its open hub, \
-        joined to it by thin cylinders. The built-in camera control turns and zooms it; the selected node pulses and \
-        its group takes the accent; a frosted card over the bottom shows the node's badge (a hub's level, or Leaf), \
+        evenly round a circle facing the camera (or, with `layout = force`, where their links pull them), each leaf \
+        (level 0) a small sphere out only around its open hub, joined to it by thin cylinders. The built-in camera \
+        control turns and zooms it; the selected node pulses and its group takes the accent; a frosted card over \
+        the bottom shows the node's badge (a hub's level, or Leaf), \
         its id and the start of its text, and a tap opens all of it. The bar holds a button that fits the whole graph \
         in view and two that step through the nodes, level by level. It writes plain SwiftUI and SceneKit (iOS 17 \
         and macOS 14) into `into` (Components/Graph). The root is `GraphView(ids: [String] = [], nodes: [Node], \
@@ -86,8 +87,9 @@ public struct GraphAgent: GraniteAgentPackage {
         left out takes a default; a role no line maps uses the kit's own value (GraphNodeItem, GraphEdgeItem). \
         `look` maps the look roles to the app's names (`title = Font.brandTitle`, `accent = Color.accent`); \
         `strings` sets any word by key (`title = Map`, `hub = L{level} Hub`, `loading = Connecting…`; `{level}` \
-        stands for a hub's level); `tuning` sets any number, symbol or motion by key (`hubRadius = 0.45`, `excerpt = \
-        240`, `pulseScale = 1.12`); `launch` opens a state for `-destination <name>` (`map = graph(doc-1, doc-2)`: \
+        stands for a hub's level; `title =` alone draws no title); `tuning` sets any number, symbol or motion by key \
+        (`hubRadius = 0.45`, `excerpt = 240`, `pulseScale = 1.12`, `layout = force`); `launch` opens a state for \
+        `-destination <name>` (`map = graph(doc-1, doc-2)`: \
         the graph of those ids, the first hub selected; `text(…)` opens its whole text too). Example, a wiki whose \
         pages link to each other: {"mappings": ["node: Page id=slug level=depth text=summary", "edge: PageLink \
         from=source to=target"], "strings": ["title = Pages", "hub = Depth {level}"], "prefix": "Wiki"}. A line it \
@@ -230,7 +232,7 @@ public struct GraphAgent: GraniteAgentPackage {
         guard problems.isEmpty else { throw GraphError.problems(problems) }
 
         // The plan: every part, each number in its place.
-        let plan = KitPlan(tuning: tuning, launched: Set(launches.map(\.state.name)))
+        let plan = KitPlan(tuning: tuning, launched: Set(launches.map(\.state.name)), strings: strings)
         let flags = plan.flags
         let values = plan.values
         yield(.read(mappings: mappings.count, views: plan.views.count))
@@ -302,6 +304,11 @@ public struct GraphAgent: GraniteAgentPackage {
         root += ", load: (([String]) async throws -> Void)? = nil)"
         if look.isEmpty {
             notes.append("No `look` lines: the views use the system's fonts and colours; map the app's with `look` (`title = Font.brandTitle`).")
+        }
+        for (key, _) in tuning.sorted(by: { $0.key < $1.key }) {
+            guard let part = GraphTables.tuning.first(where: { $0.key == key })?.part, !flags.contains(part) else { continue }
+            let choice = part.split(separator: ".", maxSplits: 1).map(String.init)
+            notes.append("`\(key)` is used only with `\(choice[0]) = \(choice[1])`, so it changes nothing.")
         }
         return GraphResult(path: written.first, paths: written + stale.map(\.path), views: views,
                            conformances: mappings.map { "\($0.type): \($0.role.rawValue)" }, roots: [root], notes: notes,

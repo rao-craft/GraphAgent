@@ -7,13 +7,14 @@
 import Foundation
 
 enum KeyedLine {
-    /// `key = value` cut at its first `=`, both sides trimmed; nil when there is no `=` or either side is empty.
-    static func split(_ line: String) -> (key: String, value: String)? {
+    /// `key = value` cut at its first `=`, both sides trimmed; nil when there is no `=` or either side is empty (the
+    /// value may be, with `allowingEmpty`).
+    static func split(_ line: String, allowingEmpty: Bool = false) -> (key: String, value: String)? {
         let text = line.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let equals = text.firstIndex(of: "=") else { return nil }
         let key = text[..<equals].trimmingCharacters(in: .whitespaces)
         let value = text[text.index(after: equals)...].trimmingCharacters(in: .whitespaces)
-        guard !key.isEmpty, !value.isEmpty else { return nil }
+        guard !key.isEmpty, allowingEmpty || !value.isEmpty else { return nil }
         return (key, value)
     }
 
@@ -85,9 +86,11 @@ struct StringKey: Sendable {
     let doc: String
     /// The template flag that must hold for it to be written; nil: always.
     let part: String?
+    /// What the views do when a line sets it to nothing (`title =`); nil: it cannot be nothing.
+    let blank: String?
 
-    init(_ key: String, _ text: String, _ doc: String, part: String? = nil) {
-        self.key = key; self.text = text; self.doc = doc; self.part = part
+    init(_ key: String, _ text: String, _ doc: String, part: String? = nil, blank: String? = nil) {
+        self.key = key; self.text = text; self.doc = doc; self.part = part; self.blank = blank
     }
 
     /// Its member in the strings enum: `group.documents` is `groupDocuments`.
@@ -116,7 +119,7 @@ enum StringsLine {
     /// `title = Atlas` or `title = "Atlas"`: the key, and the words (a quoted value may use `\n` and `\"`; an
     /// unquoted one is taken as written, `\n` read as a line break).
     static func parse(_ line: String, keys: [StringKey]) -> Result<(key: StringKey, text: String), GraphError> {
-        guard let (name, raw) = KeyedLine.split(line) else {
+        guard let (name, raw) = KeyedLine.split(line, allowingEmpty: true), !name.isEmpty else {
             return .failure(.line(line, "a strings line is `key = words`, like `title = Atlas`"))
         }
         guard let key = KeyedLine.find(name, in: keys, by: \.key) else {
@@ -124,7 +127,10 @@ enum StringsLine {
         }
         let text = unquoted(raw)
         guard !text.trimmingCharacters(in: .whitespaces).isEmpty else {
-            return .failure(.line(line, "`\(key.key)` is empty: say it in words, or leave the line out for \"\(key.text)\""))
+            // Only a key that can say nothing may, and only one way: `title =` alone is no title.
+            if key.blank != nil, raw.isEmpty { return .success((key, "")) }
+            let none = key.blank == nil ? "" : ", write `\(key.key) =` alone for none,"
+            return .failure(.line(line, "`\(key.key)` is empty: say it in words\(none) or leave the line out for \"\(key.text)\""))
         }
         let wanted = Set(key.placeholders), given = Set(StringKey.placeholders(in: text))
         guard wanted == given else {
@@ -161,10 +167,22 @@ enum StringsLine {
 /// A number, size, symbol, design, material or motion the views use, by key, with its default.
 struct TuningKey: Sendable {
     enum Kind: String, Sendable {
-        case number, integer, size, symbol, design, material, animation
+        case number, integer, size, symbol, design, material, animation, layout, leaves
+
+        /// The words a key of this kind chooses among, each read by the templates as the flag `key.word`; nil for a
+        /// kind written into the views as a value.
+        var choices: [String]? {
+            switch self {
+            case .layout: return ["circle", "force"]
+            case .leaves: return ["joined", "named"]
+            default: return nil
+            }
+        }
 
         var inWords: String {
             switch self {
+            case .layout: return "a layout: circle or force"
+            case .leaves: return "a leaf rule: joined or named"
             case .number: return "a number, like 0.45"
             case .integer: return "a whole number, like 240"
             case .size: return "a size, width x height, like 150x120"
@@ -222,6 +240,8 @@ enum TuningLine {
             return ["default", "serif", "rounded", "monospaced"].first { $0 == text.lowercased() }
         case .material:
             return ["ultraThin", "thin", "regular", "thick", "ultraThick"].first { $0.lowercased() == text.lowercased().replacingOccurrences(of: "material", with: "") }
+        case .layout, .leaves:
+            return kind.choices?.first { $0 == text.lowercased() }
         case .animation:
             let body = text.hasPrefix(".") ? String(text.dropFirst()) : text
             let forms = [

@@ -4,8 +4,13 @@ extension Template {
     static let graphBar = ##"""
     import SwiftUI
 
+    //@if title
     /// The graph's bar: its title inline in the look's title, a leading button that fits the whole graph in view, and
     /// two trailing ones that step through the nodes, level by level. The app's own bar items stay where it put them.
+    //@else
+    /// The graph's bar, with no title: a leading button that fits the whole graph in view, and two trailing ones that
+    /// step through the nodes, level by level. The app's own bar items stay where it put them.
+    //@endif
     struct GraphBar: ViewModifier {
         let title: String
         let enabled: Bool
@@ -20,12 +25,14 @@ extension Template {
                 .navigationBarTitleDisplayMode(.inline)
                 #endif
                 .toolbar {
+                    //@if title
                     ToolbarItem(placement: .principal) {
                         Text(title)
                             .font(GraphLook.title)
                             .foregroundStyle(GraphLook.foreground.opacity(0.75))
                             .lineLimit(1)
                     }
+                    //@endif
                     ToolbarItem(placement: leading) {
                         button("{{fitSymbol}}", GraphStrings.fit) { fit() }
                     }

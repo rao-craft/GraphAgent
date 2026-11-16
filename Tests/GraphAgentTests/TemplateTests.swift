@@ -9,9 +9,13 @@ final class TemplateTests: XCTestCase {
         KitCatalog.parts.filter { !$0.template.isEmpty }.map { ($0, $0.template) }
     }
 
-    /// Every way a call can set the flags.
+    /// Every way a call can set the flags: none, and every one the other way (every state launched, the force layout,
+    /// the leaves a hub names, leaves that vary, bodies from a seed, no title).
     private var plans: [KitPlan] {
-        [KitPlan(tuning: [:], launched: []), KitPlan(tuning: [:], launched: Set(GraphTables.launch.map(\.name)))]
+        let every = Set(GraphTables.launch.map(\.name))
+        let other = ["layout": "force", "hubLeaves": "named", "leafRadiusSpread": "0.04", "bodySeed": "7"]
+        return [KitPlan(tuning: [:], launched: []), KitPlan(tuning: [:], launched: every),
+                KitPlan(tuning: other, launched: every, strings: ["title": ""])]
     }
 
     private func matches(_ pattern: String, in text: String, group: Int = 0) -> [String] {
@@ -31,16 +35,26 @@ final class TemplateTests: XCTestCase {
         }
     }
 
+    /// A key is used as a `{{key}}` or, when it chooses among words, as the flags `key.word` the templates read.
     func testEveryPlaceholderIsATuningKeyAndEveryKeyIsUsed() {
         let known = Set(KitPlan(tuning: [:], launched: []).values.keys)
-        var used: Set<String> = []
+        var used: Set<String> = [], read: Set<String> = []
         for (part, text) in templates {
             for key in TemplateRender.placeholders(in: text) {
                 XCTAssertTrue(known.contains(key), "\(part.name) uses {{\(key)}}, which no tuning key fills")
                 used.insert(key.components(separatedBy: ".")[0])
             }
+            for condition in matches(#"(?m)^\s*//@if (.+)$"#, in: text, group: 1) {
+                read.formUnion(condition.components(separatedBy: CharacterSet(charactersIn: "|&! ")).filter { !$0.isEmpty })
+            }
         }
-        for key in GraphTables.tuning { XCTAssertTrue(used.contains(key.key), "no template uses the tuning key \(key.key)") }
+        for key in GraphTables.tuning {
+            if let choices = key.kind.choices {
+                XCTAssertTrue(choices.contains { read.contains(key.key + "." + $0) }, "no template reads the tuning key \(key.key)")
+            } else {
+                XCTAssertTrue(used.contains(key.key), "no template uses the tuning key \(key.key)")
+            }
+        }
     }
 
     func testEveryWordATemplateSaysIsAStringKeyAndEveryKeyIsSaid() {

@@ -4,9 +4,16 @@ extension Template {
     static let graphView = ##"""
     import SwiftUI
 
+    //@if layout.force
+    /// A 3D graph of how things connect: hubs (level above 0) as large spheres and leaves (level 0) as small ones,
+    /// standing where their links pull them and every other node pushes them, each hub's leaves out while it is open,
+    /// joined to it by thin cylinders. The built-in camera control turns and zooms it. A tap on a node selects it (a
+    /// hub opens), a tap elsewhere selects none; the
+    //@else
     /// A 3D graph of how things connect: hubs (level above 0) as large spheres evenly round a circle facing the
     /// camera, each hub's leaves (level 0) out around it while it is open, joined to it by thin cylinders. The built-in
     /// camera control turns and zooms it. A tap on a node selects it (a hub opens), a tap elsewhere selects none; the
+    //@endif
     /// selected node pulses, and its card rises over the bottom with its badge, its id and the start of its text. The
     /// bar fits the whole graph in view and steps through the nodes. A spinner shows until there are nodes; `load` is
     /// called with `ids` as it appears, and the first hub is selected once they come. It never routes: the app

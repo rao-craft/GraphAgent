@@ -23,7 +23,7 @@ enum GraphTables {
     // MARK: Strings
 
     static let strings: [StringKey] = [
-        StringKey("title", "Graph", "The bar's title."),
+        StringKey("title", "Graph", "The bar's title.", blank: "The bar holds only its three buttons, and the page's navigation title is empty."),
         StringKey("hub", "Level {level}", "A hub's badge, `{level}` its level: `L{level} Hub` reads \"L2 Hub\"."),
         StringKey("leaf", "Leaf", "A leaf's badge."),
         StringKey("loading", "Loading…", "Under the spinner while the graph loads."),
@@ -41,9 +41,15 @@ enum GraphTables {
         TuningKey("hubRadius", .number, "0.45", "A hub's radius before its level adds to it."),
         TuningKey("hubRadiusStep", .number, "0.18", "What each level adds to a hub's radius."),
         TuningKey("leafRadius", .number, "0.18", "A leaf's radius."),
-        TuningKey("ringRadius", .number, "3", "The circle the hubs stand on, facing the camera, the first at the top; a lone hub stands at the centre."),
-        TuningKey("leafDistance", .number, "1.8", "How far a leaf stands from its hub."),
+        TuningKey("leafRadiusSpread", .number, "0", "How much a leaf's radius varies by its id, either side of `leafRadius`; above 0, about half the leaves also carry a smaller lump half in them, as a hub does."),
+        TuningKey("bodySeed", .integer, "0", "Mixed into each node's id to draw its body: a hub's lumps and how long its hover takes, and with `leafRadiusSpread` a leaf's radius and lump. `0` draws from the id alone; any other number draws every body anew, the same every launch."),
+        TuningKey("layout", .layout, "circle", "Where the nodes stand. `circle`: the hubs evenly round a circle facing the camera, the first at the top (a lone hub at the centre), each leaf `leafDistance` from its hub. `force`: every node pushed from every other (a hub from a hub harder) and pulled along its links toward the nodes it joins, all drawn gently to the centre until they settle, nothing further than 12 from it, the whole centred; the hubs start round a band, the higher a level the further out, a leaf beside the node it names first, drawn from `layoutSeed`; when more nodes come, those already standing start where they stood and hold still for the first fifty steps; the camera keeps its distance from the graph's middle rather than from the node it centres, so a node nearer it looks larger."),
+        TuningKey("layoutSeed", .integer, "1", "Where the force layout's starts are drawn from: the same graph and seed stand the same way every launch.", part: "layout.force"),
+        TuningKey("ringRadius", .number, "3", "The circle the hubs stand on, facing the camera, the first at the top; a lone hub stands at the centre.", part: "layout.circle"),
+        TuningKey("leafDistance", .number, "1.8", "How far a leaf stands from its hub.", part: "layout.circle"),
+        TuningKey("hubLeaves", .leaves, "joined", "Which leaves an open hub puts out, in the accent with it and joined to it by edges, and which hub a leaf opens. `joined`: every leaf joined to it, whichever of the two names the link; a leaf opens the first hub, in the stepping order, joined to it. `named`: only the leaves it names itself (its own neighbours, and the far end of each edge it starts); a leaf opens the first hub, in the stepping order, that names it, and none when no hub does."),
         TuningKey("edgeRadius", .number, "0.03", "An edge's radius: a cylinder from one node's centre to the other's."),
+        TuningKey("clayDetail", .number, "0.5", "How much the clay's finer folds show: each finer of the three octaves of its noise weighs this much of the one before; higher is lumpier."),
         TuningKey("cameraDistance", .number, "14", "How far back the camera stands, looking at the centre; fitting the graph in view never comes nearer."),
         TuningKey("hubFocus", .number, "18", "How far the camera stands from a hub it centres on."),
         TuningKey("leafFocus", .number, "12", "How far the camera stands from a leaf it centres on."),

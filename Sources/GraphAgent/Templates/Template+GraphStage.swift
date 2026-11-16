@@ -127,10 +127,18 @@ extension Template {
             bodies = [:]
             materials = [:]
             links = []
+            //@if layout.force
+            places = GraphLayout.positions(shape, keeping: places)
+            //@else
             places = GraphLayout.positions(shape)
+            //@endif
             for dot in shape.dots {
                 guard let place = places[dot.id] else { continue }
+                //@if bodySeed
+                var seed = Seed(dot.id + "/{{bodySeed}}")
+                //@else
                 var seed = Seed(dot.id)
+                //@endif
                 let material = body(hub: dot.isHub)
                 let node = SCNNode()
                 node.name = Self.prefix + dot.id
@@ -146,10 +154,15 @@ extension Template {
                     hover.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
                     node.addAnimation(hover, forKey: "hover")
                 } else {
+                    //@if leafSpread
+                    let radius = Float({{leafRadius}}) + seed.within(-{{leafRadiusSpread}}, {{leafRadiusSpread}})
+                    leaf(node, radius: radius, seed: &seed, material: material)
+                    //@else
                     let sphere = SCNSphere(radius: {{leafRadius}})
                     sphere.segmentCount = 14
                     sphere.firstMaterial = material
                     node.addChildNode(SCNNode(geometry: sphere))
+                    //@endif
                     node.opacity = 0
                     node.simdScale = SIMD3<Float>(repeating: 0.01)
                 }
@@ -186,6 +199,26 @@ extension Template {
             }
         }
 
+        //@if leafSpread
+        /// A leaf's body: a sphere, and about every other leaf a smaller one half in it, the same for the same id every
+        /// time.
+        private func leaf(_ node: SCNNode, radius: Float, seed: inout Seed, material: SCNMaterial) {
+            let core = SCNSphere(radius: CGFloat(radius))
+            core.segmentCount = 14
+            core.firstMaterial = material
+            node.addChildNode(SCNNode(geometry: core))
+            guard seed.next() < 0.5 else { return }
+            let lump = SCNSphere(radius: CGFloat(radius * seed.within(0.4, 0.65)))
+            lump.segmentCount = 12
+            lump.firstMaterial = material
+            let child = SCNNode(geometry: lump)
+            let out = radius * seed.within(0.3, 0.7)
+            let turn = seed.within(0, 2 * Float.pi)
+            child.simdPosition = SIMD3<Float>(out * cos(turn), out * seed.within(-0.3, 0.3), out * sin(turn))
+            node.addChildNode(child)
+        }
+
+        //@endif
         /// A link: a cylinder from one node's centre to the other's.
         private func cylinder(from start: SIMD3<Float>, to end: SIMD3<Float>) -> SCNNode {
             let span = end - start
@@ -279,8 +312,15 @@ extension Template {
 
         // MARK: Camera
 
+        //@if layout.force
+        /// Moves `eye` (the view's point of view) along its line of sight until the node with `id` is centred, as far
+        /// from the graph's middle (the plane through its centre, facing the camera) as a hub's or a leaf's focus: a
+        /// node nearer the camera than the middle looks larger. Returns where the node stands, for the camera control
+        /// to turn about.
+        //@else
         /// Moves `eye` (the view's point of view) along its line of sight until the node with `id` is centred, as far
         /// from it as a hub's or a leaf's focus. Returns where the node stands, for the camera control to turn about.
+        //@endif
         @discardableResult
         func focus(on id: String, eye: SCNNode, animated: Bool = true) -> SIMD3<Float>? {
             guard let dot = shape.dot(id), let target = places[id] else { return nil }
@@ -288,7 +328,11 @@ extension Template {
             SCNTransaction.begin()
             SCNTransaction.animationDuration = animated ? 0.6 : 0
             SCNTransaction.animationTimingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            //@if layout.force
+            eye.simdWorldPosition = target - eye.simdWorldFront * (distance + simd_dot(target, eye.simdWorldFront))
+            //@else
             eye.simdWorldPosition = target - eye.simdWorldFront * distance
+            //@endif
             SCNTransaction.commit()
             return target
         }
@@ -373,9 +417,9 @@ extension Template {
                 for (int octave = 0; octave < 3; octave++) {
                     sum += weight * graphClayNoise(p);
                     p = p * 2.02 + float3(1.7, 9.2, 5.3);
-                    weight *= 0.5;
+                    weight *= {{clayDetail}};
                 }
-                return sum / 0.875;
+                return sum / {{clayDetail.total}};
             }
 
             #pragma body

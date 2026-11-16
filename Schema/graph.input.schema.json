@@ -45,14 +45,14 @@
       "type" : "string"
     },
     "strings" : {
-      "description" : "the words, one a line, `key = words` (quotes optional): `title = Atlas`, `hub = L{level} Hub`, `loading = Connecting…`; every key and its default in Graph.md",
+      "description" : "the words, one a line, `key = words` (quotes optional): `title = Atlas`, `hub = L{level} Hub`, `loading = Connecting…`; `title =` with nothing after it draws no title; every key and its default in Graph.md",
       "items" : {
         "type" : "string"
       },
       "type" : "array"
     },
     "tuning" : {
-      "description" : "numbers, symbols and motion, one a line: `hubRadius = 0.45`, `excerpt = 240`, `pulseScale = 1.12`, `showAnimation = .spring(response: 0.4, dampingFraction: 0.8)`; every key in Graph.md",
+      "description" : "numbers, symbols and motion, one a line: `hubRadius = 0.45`, `excerpt = 240`, `pulseScale = 1.12`, `showAnimation = .spring(response: 0.4, dampingFraction: 0.8)`; `layout = force` stands the nodes where their links pull them instead of round a circle (`layoutSeed = 7` picks its starts); `hubLeaves = named` puts out only the leaves an open hub names itself; every key in Graph.md",
       "items" : {
         "type" : "string"
       },

@@ -21,8 +21,8 @@ line it reads. Everything above **Changes** describes the agent as it is; Change
 | `mappings` | no | one line a role (node, edge): `node: GraphNode id=id level=level text=text neighbours=neighborIds`, `edge: Link from=source to=target`; a bare path is read off the value, anything else is Swift that may name `value` |
 | `imports` | no | modules the conformances import, such as the package a mapped type is declared in |
 | `look` | no | look roles mapped to the app's names, one a line: `title = Font.brandTitle`; roles title, note, note2, passage (Font), accent, foreground, hubBadge, leafBadge (Color); an unmapped role is the system's |
-| `strings` | no | the words, one a line, `key = words` (quotes optional): `title = Atlas`, `hub = L{level} Hub`, `loading = Connecting…`; every key and its default in Graph.md |
-| `tuning` | no | numbers, symbols and motion, one a line: `hubRadius = 0.45`, `excerpt = 240`, `pulseScale = 1.12`, `showAnimation = .spring(response: 0.4, dampingFraction: 0.8)`; every key in Graph.md |
+| `strings` | no | the words, one a line, `key = words` (quotes optional): `title = Atlas`, `hub = L{level} Hub`, `loading = Connecting…`; `title =` with nothing after it draws no title; every key and its default in Graph.md |
+| `tuning` | no | numbers, symbols and motion, one a line: `hubRadius = 0.45`, `excerpt = 240`, `pulseScale = 1.12`, `showAnimation = .spring(response: 0.4, dampingFraction: 0.8)`; `layout = force` stands the nodes where their links pull them instead of round a circle (`layoutSeed = 7` picks its starts); `hubLeaves = named` puts out only the leaves an open hub names itself; every key in Graph.md |
 | `launch` | no | the state the root opens in for a launch with `-destination <name>`, one a line: `atlas = graph(space-001, space-002)`; states graph and text, each with the ids it loads in parentheses (none: the page's own) |
 | `prefix` | no | what the kit's names start with instead of Graph, when the app already has those names: `Wiki` writes WikiView |
 
@@ -74,11 +74,11 @@ Maps a look role to the app's own name for it. A font role takes a `Font` expres
 
 ### `strings`: `key = words`
 
-Sets any word the views say. Quotes are optional; a quoted value reads `\n` and `\"`. `{level}` stands for a hub's level; a line must say the same `{…}` as the default.
+Sets any word the views say. Quotes are optional; a quoted value reads `\n` and `\"`. `{level}` stands for a hub's level; a line must say the same `{…}` as the default. Only `title` may say nothing, written `title =` alone.
 
 | Key | Default | What it is |
 | --- | --- | --- |
-| `title` | Graph | The bar's title. |
+| `title` | Graph | The bar's title. `title =` alone: the bar holds only its three buttons, and the page's navigation title is empty. |
 | `hub` | Level {level} | A hub's badge, `{level}` its level: `L{level} Hub` reads "L2 Hub". |
 | `leaf` | Leaf | A leaf's badge. |
 | `loading` | Loading… | Under the spinner while the graph loads. |
@@ -91,16 +91,22 @@ Sets any word the views say. Quotes are optional; a quoted value reads `\n` and 
 
 ### `tuning`: `key = value`
 
-Sets any number, symbol or motion the views use. A number is a decimal (`0.45`), a whole number an integer, a symbol an SF Symbol's name, a design one of default, serif, rounded or monospaced, a material one of ultraThin, thin, regular, thick or ultraThick, and a motion an animation as SwiftUI writes it (`.spring(response: 0.4, dampingFraction: 0.8)`). Each is written into the views where a person would write the number: `SCNSphere(radius: 0.18)`, `text.prefix(240)`.
+Sets any number, symbol or motion the views use. A number is a decimal (`0.45`), a whole number an integer, a symbol an SF Symbol's name, a design one of default, serif, rounded or monospaced, a material one of ultraThin, thin, regular, thick or ultraThick, a layout circle or force, a leaf rule joined or named, and a motion an animation as SwiftUI writes it (`.spring(response: 0.4, dampingFraction: 0.8)`). Each is written into the views where a person would write the number: `SCNSphere(radius: 0.18)`, `text.prefix(240)`; a layout or a leaf rule picks the code written instead.
 
 | Key | Kind | Default | What it sets |
 | --- | --- | --- | --- |
 | `hubRadius` | number | `0.45` | A hub's radius before its level adds to it. |
 | `hubRadiusStep` | number | `0.18` | What each level adds to a hub's radius. |
 | `leafRadius` | number | `0.18` | A leaf's radius. |
-| `ringRadius` | number | `3` | The circle the hubs stand on, facing the camera, the first at the top; a lone hub stands at the centre. |
-| `leafDistance` | number | `1.8` | How far a leaf stands from its hub. |
+| `leafRadiusSpread` | number | `0` | How much a leaf's radius varies by its id, either side of `leafRadius`; above 0, about half the leaves also carry a smaller lump half in them, as a hub does. |
+| `bodySeed` | integer | `0` | Mixed into each node's id to draw its body: a hub's lumps and how long its hover takes, and with `leafRadiusSpread` a leaf's radius and lump. `0` draws from the id alone; any other number draws every body anew, the same every launch. |
+| `layout` | layout | `circle` | Where the nodes stand. `circle`: the hubs evenly round a circle facing the camera, the first at the top (a lone hub at the centre), each leaf `leafDistance` from its hub. `force`: every node pushed from every other (a hub from a hub harder) and pulled along its links toward the nodes it joins, all drawn gently to the centre until they settle, nothing further than 12 from it, the whole centred; the hubs start round a band, the higher a level the further out, a leaf beside the node it names first, drawn from `layoutSeed`; when more nodes come, those already standing start where they stood and hold still for the first fifty steps; the camera keeps its distance from the graph's middle rather than from the node it centres, so a node nearer it looks larger. |
+| `layoutSeed` | integer | `1` | Where the force layout's starts are drawn from: the same graph and seed stand the same way every launch. Used only with `layout = force`. |
+| `ringRadius` | number | `3` | The circle the hubs stand on, facing the camera, the first at the top; a lone hub stands at the centre. Used only with `layout = circle`. |
+| `leafDistance` | number | `1.8` | How far a leaf stands from its hub. Used only with `layout = circle`. |
+| `hubLeaves` | leaves | `joined` | Which leaves an open hub puts out, in the accent with it and joined to it by edges, and which hub a leaf opens. `joined`: every leaf joined to it, whichever of the two names the link; a leaf opens the first hub, in the stepping order, joined to it. `named`: only the leaves it names itself (its own neighbours, and the far end of each edge it starts); a leaf opens the first hub, in the stepping order, that names it, and none when no hub does. |
 | `edgeRadius` | number | `0.03` | An edge's radius: a cylinder from one node's centre to the other's. |
+| `clayDetail` | number | `0.5` | How much the clay's finer folds show: each finer of the three octaves of its noise weighs this much of the one before; higher is lumpier. |
 | `cameraDistance` | number | `14` | How far back the camera stands, looking at the centre; fitting the graph in view never comes nearer. |
 | `hubFocus` | number | `18` | How far the camera stands from a hub it centres on. |
 | `leafFocus` | number | `12` | How far the camera stands from a leaf it centres on. |
@@ -139,11 +145,11 @@ Into `into` (`Components/Graph` when left out), every file parsed with `swiftc -
 | `GraphProtocols.swift` | The two protocols the views read, a default for every requirement, and the kit's own value types |
 | `GraphValue.swift` | The conversions every mapped value goes through |
 | `GraphLook.swift`, `GraphStrings.swift`, `GraphLaunch.swift` | The look roles, every word and the launch state, from the call |
-| `GraphSupport.swift` | The graph as the scene draws it (each node and link once, which leaves are out, which nodes glow), where each node stands, how a node's text reads, the light tap |
+| `GraphSupport.swift` | The graph as the scene draws it (each node and link once, which leaves are out, which nodes glow), where each node stands (round a circle, or where the force layout settles them), how a node's text reads, the light tap |
 | `GraphStage.swift` | The SceneKit scene: the camera and its lights, a clay sphere for every node (a hub's with two or three lumps, hovering), a cylinder for every link, and how they show the open hub, the selection, the theme and the accent |
 | `GraphScene.swift` | The SCNView with the built-in camera control, and the tap that picks a node |
 | `GraphView.swift` | The root a page shows: the scene, the card of the selected node, the bar, loading, empty and failure |
-| `GraphBar.swift` | The bar: the title, fit the whole graph in view, the node before and after |
+| `GraphBar.swift` | The bar: the title (none with `title =`), fit the whole graph in view, the node before and after |
 | `GraphPanel.swift`, `GraphBadge.swift`, `GraphTextSheet.swift` | The selected node's card, its level badge, and its whole text in a sheet |
 | `GraphLoadingView.swift`, `GraphEmptyView.swift`, `GraphFailedView.swift` | The spinner and its words, no nodes, and a failure with Retry |
 | `GraphPreviews.swift` | The sample graph every `#Preview` draws |
@@ -163,8 +169,8 @@ GraphView(ids: [String] = [], nodes: [Page], edges: [PageLink], load: (([String]
 nodes, a throw shows the failure and Retry, and no nodes after a load shows `empty`. Once nodes are there the first
 in the stepping order (the higher levels first, then by id) is selected and its hub opened. A tap on a hub opens or
 closes it and selects it; a tap on a leaf selects it; a tap elsewhere, or on the card's close mark, selects none. The
-root wears its own bar (the title inline, in `title`) and needs a navigation stack around it, which a sheet's host
-gives it. The views never route: the app presents the graph, and the kit presents only the text sheet.
+root wears its own bar (the title inline, in `title`, or none with `title =`) and needs a navigation stack around it,
+which a sheet's host gives it. The views never route: the app presents the graph, and the kit presents only the text sheet.
 
 ## What it makes
 
@@ -190,6 +196,24 @@ kind, a launch state it does not know.
 ## Changes
 
 Newest first.
+
+### 2026-11-15 · the original's scene
+
+The Seer call now draws the Atlas scene as the original does, where the spec had departed from it; every new
+behaviour sits behind a line a call adds, so a call that names none of them writes the bytes it wrote before (the
+spec's Seer call, the wiki's and the least are pinned by SHA-256). `layout = force` is the original's force layout:
+its starts, 400 steps of push, pull and gravity, its damping, the bound of 12, the whole centred, nodes already
+standing held for fifty steps; its starts are drawn from `layoutSeed` where the original draws them at random each
+launch, and the camera keeps its distance from the graph's middle as the original's does. `hubLeaves = named` puts
+out only the leaves an open hub names itself, as the original does, and a leaf opens the first hub that names it.
+`bodySeed` is mixed into each id to draw the bodies, which the original draws anew each launch. `leafRadiusSpread`
+varies a leaf's radius by its id, about every other one with a lump. `clayDetail` weighs the clay's finer octaves;
+0.63 gives the original's 0.5, 0.3 and 0.2. `title =` alone draws no title, as the original's bar holds only its three
+buttons. The Seer example takes them all, with the seeds chosen against the reference shot (`layoutSeed = 417352`,
+`bodySeed = 19106`), the original's thin links (`edgeRadius = 0.022`), its fit floor (`cameraDistance = 12`) and
+`atlas = graph(space-001)`. Measured: rendered at the sheet's size, the scene of the reference's ten nodes puts the
+selected hub, the white hub above it, the far leaf up to the right and the leaf below where the reference shot has
+them, and the hub's one lump where the reference's is.
 
 ### 2026-11-15 · first version
 

@@ -16,13 +16,14 @@ GRAPH_BUILD=1 swift test --filter GraphBuildTests   # the output built and rende
 - **The lines.** Every kind of line (mappings, look, strings, tuning, launch), accepted and refused, each refusal with
   its reason; the field types each kind of property takes; every key documented, unique and with a default that reads.
 - **The templates.** Every template renders with every set of flags, with no marker and no placeholder left; every
-  `{{key}}` is a tuning key and every tuning key is used; every word a template says is a string key and every key is
+  `{{key}}` is a tuning key and every tuning key is used (a layout or a leaf rule as the flags it sets); every word a template says is a string key and every key is
   said; every look role is read; every requirement a template reads is a role's, and every one is read; every type a
   part declares is listed for the prefix; the root opens every launch state; the scene holds nothing but spheres and
   cylinders.
 - **The files.** Which files and names a call writes; the Seer call's output (its file set, its conformance, its
-  words, its numbers, its look, its launch, the scorecard's code facts, and none of the mock graph's ids); the same
-  bytes on a second call; a later call that takes away a conformance it no longer maps; the prefix; the app's types
+  words, its numbers, its look, its launch, the scorecard's code facts, and none of the mock graph's ids); the bytes a
+  call that names no later key has always written (the spec's Seer call, the wiki's and the least, pinned by SHA-256);
+  the same bytes on a second call; a later call that takes away a conformance it no longer maps; the prefix; the app's types
   checked against the lines; a node line without its id and an edge line without both ends refused; the notes.
 - **A call through the roster.** The Seer call as a host makes it, JSON in and JSON out, and its answer is
   `Schema/examples/seer.answer.json` (`GRAPH_EXAMPLES=1` writes it again).
@@ -40,11 +41,13 @@ GRAPH_BUILD=1 swift test --filter GraphBuildTests   # the output built and rende
 - **The least call:** no mapping, the kit's own values.
 
 It builds the package with `swift build` for the Mac with no warning in what the kit wrote, and runs a check that
-reads every conformance, word, link, layout position and launch state back and draws every view offscreen in light
-and dark. On the Mac the check also renders Seer's scene with SceneKit, the first hub selected and centred, in light
-and in dark, and reads its pixels: the hub and its two leaves in the accent's bronze, the other two hubs plain (near
-white in light, mid grey in dark), nothing behind them; the clay shader must compile (`GRAPH_SHOTS=<folder>` keeps the
-renders). Then it builds the package with `xcodebuild -destination 'generic/platform=iOS Simulator'`. No simulator is
+reads every conformance, word, link and launch state back, the leaves a hub names, the force layout (every node
+standing, the same for the seed, another for another seed, centred, kept when nothing is new) and, for the least call,
+the circle, and draws every view offscreen in light and dark. On the Mac the check also renders Seer's scene with
+SceneKit in light and in dark and reads its pixels where the layout stands each node: the first hub selected and
+centred, it and its leaves in the accent's bronze, nothing behind them; then the whole graph fitted with nothing
+open, every hub plain (near white in light, mid grey in dark) and no leaf showing; the clay shader must compile
+(`GRAPH_SHOTS=<folder>` keeps the renders). Then it builds the package with `xcodebuild -destination 'generic/platform=iOS Simulator'`. No simulator is
 booted.
 
 ## Conformance on Seer
@@ -56,10 +59,13 @@ The call a model should write for Seer's Atlas, `Schema/examples/seer.json`, sen
   `GraphView(nodes: graph.state.nodes, load: { try await graph.load(ids: $0) })`;
 - every `code` item of the scorecard's `atlas` area (`.work/measure/task/seer/scorecard.json` in Craft) matches it,
   B-atlas-4 to B-atlas-8; B-data-8 is the mock graph's ids, which are `$mocks`' to write, and the kit never writes them;
-- every word the spec quotes for the Atlas sheet is in it: "Atlas", "L2 Hub" (as `"L\(level) Hub"`), "Leaf",
-  "Connecting…".
+- every word the spec quotes for the Atlas sheet is in it but the title: "L2 Hub" (as `"L\(level) Hub"`), "Leaf",
+  "Connecting…"; the original's bar has no title, so the call says `title =`.
 
 The views mirror the original's subviews (the scene's lights, camera, materials and motion, the card, the text sheet,
-the bar, the status views), each value a string, look or tuning key the call sets; where Seer's spec departs from the
-original (the title in the bar, the built-in camera control, the circle layout, the camera 14 back) they follow the
-spec.
+the bar, the status views), each value a string, look or tuning key the call sets. Where Seer's spec departs from the
+original the reference wins, through lines the call adds: the force layout (`layout = force`, `layoutSeed = 417352`),
+only the leaves a hub names (`hubLeaves = named`), the bodies' draw (`bodySeed = 19106`), leaves of varied size
+(`leafRadiusSpread = 0.04`), the clay's octaves (`clayDetail = 0.63`), the thin links (`edgeRadius = 0.022`), the fit
+floor (`cameraDistance = 12`) and no title (`title =`). The original draws its layout and its bodies at random each
+launch; the two seeds were chosen against the reference shot. The built-in camera control stays, as the spec asks.

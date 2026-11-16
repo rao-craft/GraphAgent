@@ -2,9 +2,9 @@
 
 Show how an app's things connect, in 3D, without drawing it by hand. Say which of your types is a node (its id, its
 level, its text and the ids it links to), and which is an edge if you keep links apart, and `graph` writes the screen
-that shows them: hubs as large clay spheres round a circle facing you, each hub's leaves out around it while it is
-open, joined by thin cylinders, the selected node pulsing, and a frosted card over the bottom with its badge, its id
-and the start of its text. What it writes is plain SwiftUI and SceneKit that works in any app, with no Granite
+that shows them: hubs as large clay spheres round a circle facing you (or standing where their links pull them),
+each hub's leaves out around it while it is open, joined by thin cylinders, the selected node pulsing, and a frosted
+card over the bottom with its badge, its id and the start of its text. What it writes is plain SwiftUI and SceneKit that works in any app, with no Granite
 dependency in it.
 
 ## What you can ask
@@ -14,6 +14,7 @@ $graph the knowledge graph over SeerKit's GraphNode, titled Atlas, badges like L
 $graph a map of the wiki's pages: depth is the level, PageLink joins two pages, prefixed Wiki
 $graph the graph in the app's own fonts and accent, the text cut at 160 characters
 $graph open on the graph of doc-1 and doc-2 when the app is launched with -destination map
+$graph the nodes where their links pull them, the same every launch, and no title in the bar
 ```
 
 Craft writes the call from your request, shows it on its agent map as `graph-1`, and builds and tests what it writes
@@ -23,7 +24,8 @@ with the turn.
 
 - **The whole graph.** A SceneKit scene with no backdrop of its own: hubs (level above 0) sized by their level, each a
   sphere with a lump or two that hovers; leaves (level 0) out only around their open hub; links as thin cylinders that
-  swell slowly. The open hub, its leaves and the selected node take your accent; every other sphere is near white in
+  swell slowly. The hubs stand round a circle, or, with `layout = force`, where a force layout settles them, the same
+  every launch for its seed. The open hub, its leaves and the selected node take your accent; every other sphere is near white in
   light mode and mid grey in dark. The built-in camera control turns, moves and zooms it, and the camera eases to the
   node you pick.
 - **The card and the bar.** The selected node's badge (`L2 Hub` or `Leaf`), its id and a close mark, then the start of
